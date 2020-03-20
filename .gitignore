@@ -42,7 +42,7 @@ Thumbs.db
 *__init__*
 *__pycache__*
 /experiments/*
-!/experiments/PKDD_2020/output_for_paper.ipynb
+!*/experiments/PKDD_2020/output_for_paper.ipynb
 !/experiments/PKDD_2020/paramethers.py
 !/experiments/PKDD_2020/computing_and_summarising.py
 
