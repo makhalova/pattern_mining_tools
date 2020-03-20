@@ -24,7 +24,16 @@ The project contains a series of tools for dealing with patterns in binary and n
 
 ## How to run
 
+Procedures use data in darray
+
 [//]: # (```sh  $ cd dillinger```)
+
+## Some sourses of datasets
+
+For binary pattern mining use any binary dataset, e.g., from the [LUCS-KDD](https://cgi.csc.liv.ac.uk/~frans/KDD/Software/LUCS-KDD-DN/DataSets/dataSets.html) library, or binarise transaction data / numerical datasets.
+
+For numerical pattern mining use any numerical datast, including [UCI](https://archive.ics.uci.edu/ml/index.php) repository.
+
 
 
 [//]: # (| Plugin | README |
