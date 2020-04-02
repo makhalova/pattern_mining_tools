@@ -51,24 +51,24 @@ logging.debug('Convert itemsets from pickle-file to Krimp readable')
 # Converting itemsets to Krimp readable format ".isc"
 # --------------------------------------------------
 for file_name in itemset_set_list:
-   if os.path.exists(file_name):
-       itemsets = {}
-       levels = np.sort([get_level(file_name, f) for f in glob(file_name + '/*') if re.match(r''+file_name + '/\d', f) ])
-       #levels = [f for f in glob(file_name + '/*') if re.match(r''+file_name + '/\d', f) ]
-       data_name = file_name[start_data_name:]
-       output_dir = main_data_dir +  data_name + '/transformed/candidates/'
-       start_level_num = len(file_name) + 1
-       for num_level in levels:
-           f_level = file_name + '/'+ str(num_level)
-           with open(f_level, 'rb') as f:
-               itemsets_new = pickle.load(f)
-               itemsets.update(itemsets_new)
-               output_file_name = output_dir + name_dict[data_name] + data_name_ads1 + '_' + f_level[start_level_num : ] + '-'+ data_name_ads2
-               print(output_file_name, len(itemsets))
-               #write_isc(output_file_name, itemsets, name_dict[data_name] + data_name_ads1)
-               print(output_file_name)
-               
-
+    if os.path.exists(file_name):
+        itemsets = {}
+        levels = np.sort([get_level(file_name, f) for f in glob(file_name + '/*') if re.match(r''+file_name + '/\d', f) ])
+        #levels = [f for f in glob(file_name + '/*') if re.match(r''+file_name + '/\d', f) ]
+        data_name = file_name[start_data_name:]
+        output_dir = main_data_dir +  data_name + '/transformed/candidates/'
+        start_level_num = len(file_name) + 1
+        for num_level in levels:
+            f_level = file_name + '/'+ str(num_level)
+            with open(f_level, 'rb') as f:
+                itemsets_new = pickle.load(f)
+                itemsets.update(itemsets_new)
+                output_file_name = output_dir + name_dict[data_name] + data_name_ads1 + '_' + f_level[start_level_num : ] + '-'+ data_name_ads2
+                print(output_file_name, len(itemsets))
+                #write_isc(output_file_name, itemsets, name_dict[data_name] + data_name_ads1)
+                print(output_file_name)
+                
+                
 logging.debug('Computing the dataset descriptions')
 # --------------------------------------------------
 # computing dataset descriptions
