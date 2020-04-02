@@ -1,4 +1,4 @@
-# GDPM: an Algorithm for Gradual Discovery\\in Pattern Mining    
+# GDPM: an Algorithm for Gradual Discovery in Pattern Mining    
 ## PKDD-2020 experiments
 ---
 Read this instruction to replicate experiments. To select optimal patterns among the generates ones we use [Krimp](https://people.mmci.uni-saarland.de/~jilles/prj/krimp/). The experiments includes intermediate procedures to (re)convert data to a Krimp-readable format.
