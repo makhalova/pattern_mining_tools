@@ -22,7 +22,6 @@ from modules.analysers.is_supervised_analyser import get_average_performance_fas
 # initialisation
 # --------------------------------------------------
 # CHANGE ITEMSET DIR
-itemsets_data_dir = '../CLA_2020/results/'
 itemset_set_list = glob(itemsets_data_dir+ 'closed_itemsets/*')
 
 start_data_name = len(itemsets_data_dir+ 'closed_itemsets/')

@@ -30,3 +30,4 @@ max_cmp_dict = {'auto' : 8, 'breast' : 6, 'car_evaluation' : 6,
     'soybean' : 10, 'tic_tac_toe' : 7, 'wine' : 7, 'zoo' : 7}
 
 main_data_dir = '../../../../datasets/'
+itemsets_data_dir = '../results/'
