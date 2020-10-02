@@ -17,6 +17,6 @@ Computing closure structure
     To compute the closure structure for `example.dat`, run 
     `gdmp example.dat` .
     
-    Summary on analyzed datasets is computed by running `scripts/dataset_characteristics.py`.
+Summary on analyzed datasets is computed by running `scripts/dataset_characteristics.py`.
     
 To analyse itemsets in supervised settings run `scripts/f1.py`.
