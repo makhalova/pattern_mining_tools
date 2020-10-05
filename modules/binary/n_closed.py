@@ -6,7 +6,9 @@ import numpy as np
 import pickle
 import os
 import sys
+from time import time
 
+from pattern_mining_tools.modules.io.converter_writer import write_itemsets, read_itemsets
 
 def _get_closure(candidate, data):
     p_attributes = candidate[0]
@@ -76,9 +78,32 @@ def _try_to_load_as_pickled_object_or_None(filepath):
     return obj
 
 
+def _is_all_attributes(row, val):
+    return int(row.sum() == val)
+    
+def _get_extent(itemsets_with_support, data):
+    itemsets_with_extents = {}
+    for itemset, support in itemsets_with_support.items():
+        itemsets_with_extents[itemset] = np.apply_along_axis(_is_all_attributes, 1, data[:, list(itemset)], len(itemset))
+        assert(itemsets_with_extents[itemset].sum() == support)
+    return itemsets_with_extents
+    
+def get_extent(itemsets_with_support, data):
+    # the same as _get_extent, but without checking support
+    itemsets_with_extents = {}
+    for itemset, support in itemsets_with_support.items():
+        itemsets_with_extents[itemset] = np.apply_along_axis(_is_all_attributes, 1, data[:, list(itemset)], len(itemset))
+        #assert(itemsets_with_extents[itemset].sum() == support)
+    return itemsets_with_extents
 
-def compute_closed_by_level(data, max_level = None, make_log = False, dataset_output_folder = './results/'):
+
+def compute_closed_by_level(data, max_level = None, make_log = False, dataset_output_folder = None,\
+    inverse_index_dict = None, use_pickled = False):
     """Compute closed itemsets in data by closure levels.
+    
+    !WARNING!
+    Dumping of pickled objects is very memory-consuming. Try to avoid it.
+        
 
     Parameters
     ----------
@@ -97,6 +122,10 @@ def compute_closed_by_level(data, max_level = None, make_log = False, dataset_ou
     dataset_output_folder : string, default = None
         The path of the output directoty. By default the results are stored in
         the child folder "./results"
+        
+    inverse_index_dict : dictionary, default = None
+        The dictionary "new index : original index"
+        
     
     
     Returns
@@ -132,56 +161,85 @@ def compute_closed_by_level(data, max_level = None, make_log = False, dataset_ou
 
     """
     
+    if not(inverse_index_dict is None):
+        index_dict = {v : k for k,v in inverse_index_dict.items()}
+    else:
+        index_dict = None
+    
     closed_dict = {}
     attribute_set = set(range(data.shape[1]))
-    try_to_upload = True
 
     # output folder
-    if dataset_output_folder ==  './results/':
-        try_to_upload = False
+    if not(dataset_output_folder is None):
+        if not os.path.exists(dataset_output_folder):
+            os.makedirs(dataset_output_folder,exist_ok=True)
+        do_io = True # False if use 'dataset_output_folder' to write the results
     else:
-        dataset_output_folder += '/'
-    if not os.path.exists(dataset_output_folder):
-        os.makedirs(dataset_output_folder,exist_ok=True)
-
+        do_io = False
     # initialization
     if max_level is None:
         max_level = data.shape[1]
     patterns = {frozenset([i]): data[:,i] for i in range(data.shape[1])}
-
+    
     # 1-closed patterns
-    if try_to_upload and os.path.exists(dataset_output_folder + str(1)):
-        closed = _try_to_load_as_pickled_object_or_None(dataset_output_folder + str(1))
+    if do_io and os.path.exists(dataset_output_folder + str(1)):
+        if (use_pickled):
+            closed = _try_to_load_as_pickled_object_or_None(dataset_output_folder + str(1))
+        else:
+            closed_itemsets = read_itemsets(dataset_output_folder + str(1), index_dict)
+            closed = _get_extent(closed_itemsets, data)
     else:
         closed = {}
         for ids, vec in patterns.items():
             k, v = _get_closure((ids, vec), data)
             closed[k] = v
-        _save_as_pickled_object(closed, dataset_output_folder + str(1))
+        if (do_io):
+            if (use_pickled):
+                _save_as_pickled_object(closed, dataset_output_folder + str(1))
+            else:
+                write_itemsets(dataset_output_folder + str(1), closed, inverse_index_dict)
 
     closed_dict[1] = closed
     entire_pattern_dict = closed.copy() # contains all generated early closed itemsets
-
+    
     # n-closed patterns
     run = max_level > 1
+    compute_it = False
     i = 2
     while run and (max_level >= i):
         if make_log:
             print('ready to compute', i)
-        dataset_output_file = dataset_output_folder + str(i)
-        if try_to_upload and os.path.exists(dataset_output_file):
-            closed = _try_to_load_as_pickled_object_or_None(dataset_output_file)
-            entire_pattern_dict.update(closed.copy())
-        else:
+        if do_io:
+            dataset_output_file = dataset_output_folder + str(i)
+            if os.path.exists(dataset_output_file):
+                if (use_pickled):
+                    closed = _try_to_load_as_pickled_object_or_None(dataset_output_file)
+                else:
+                    closed_itemsets = read_itemsets(dataset_output_file, index_dict)
+                    closed = _get_extent(closed_itemsets, data)
+                    
+                entire_pattern_dict.update(closed.copy())
+                compute_it = False
+            else:
+                compute_it = True
+        if not(do_io) or (compute_it):
+            start_time = time()
             closed, entire_pattern_dict = _compute_merged_next(closed_dict[i-1], patterns, attribute_set, data, entire_pattern_dict)
+            if make_log:
+                print(i - 1, time() - start_time, len(closed))
             
         if len(closed) > 0:
-            _save_as_pickled_object(closed, dataset_output_file)
+            if do_io:
+                if not(os.path.exists(dataset_output_file)):
+                    if (use_pickled):
+                        _save_as_pickled_object(closed, dataset_output_file)
+                    else:
+                        write_itemsets(dataset_output_file, closed, inverse_index_dict)
             closed_dict[i] = closed
-     
             if make_log:
                 print(i,len(closed))
             i += 1
         else:
             run = False
+        
     return closed_dict

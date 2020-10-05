@@ -165,7 +165,7 @@ def db2bindata(data_dir, data_name, return_attribute_names = False):
                 _, n_cols = p.split('=')
                 n_cols = int(n_cols)
 
-        context = np.zeros((n_rows, n_cols))
+        context = np.zeros((n_rows, n_cols), dtype = int)
         # fill the context
         for i in range(n_rows):
             items = s.split()
@@ -180,10 +180,11 @@ def db2bindata(data_dir, data_name, return_attribute_names = False):
 
     # write to cxt file with the krimp-encoded items
     # attribute names
-    attribute_names = info["ab"].split(' ')
+    attribute_names = info["it"].split(' ')
     attribute_cols = [int(i) for i in attribute_names]
     next_negated = max(attribute_cols) + 1
     cxt_rows = n_rows
+    
     if return_attribute_names:
         return context, attribute_cols
     else:
@@ -333,7 +334,7 @@ def write_isc(output_file_name, itemsets, dname):
         
     Parameters
     ----------
-    
+
     output_file_name : string
         The path of the output file.
         
@@ -344,10 +345,23 @@ def write_isc(output_file_name, itemsets, dname):
     dname : the name of the dataset used to compute the itemsets.
     """
 
+    max_item_length = max(set([len(str(i)) for key in itemsets.keys() for i in key ]))
+    dict_to_sort = {}
+    for key in itemsets.keys():
+        list_of_str = [str(i) for i in key ]
+        dict_to_sort[key] = ''.join(sorted(["0" * (max_item_length - len(i)) + i for i in list_of_str]))
+
+    dict_to_sort = {k: v for k, v in sorted(dict_to_sort.items(), key=lambda item: item[1])}
+    sorted_itemsets = {k : itemsets[k] for k in dict_to_sort.keys()}
+
     numSets = len(itemsets)
-    itemsets_sup_num = {k : np.sum(val) for k, val in itemsets.items()}
+
+    itemsets_len = {k : len(k) for k, val in sorted_itemsets.items()}
+    sort_itemsets_len = {k: sorted_itemsets[k] for k, v in sorted(itemsets_len.items(), key=lambda item: item[1], reverse=True)}
+
+    itemsets_sup_num = {k : np.sum(val) for k, val in sort_itemsets_len.items()}
     sort_itemsets_sup_num = {k: v for k, v in sorted(itemsets_sup_num.items(), key=lambda item: item[1], reverse=True)}
-    
+
     maxLen = np.max([len(itemset) for itemset in sort_itemsets_sup_num.keys()])
     minSupport = np.min([support for support in sort_itemsets_sup_num.values()])
 
@@ -356,8 +370,8 @@ def write_isc(output_file_name, itemsets, dname):
         f.writelines('mi: numSets={0:d} minSup={1:d} maxLen={2:d} sepRows=0 iscOrder=d patType=closed dbName={3:s}\n'.format(len(itemsets), minSupport, maxLen, dname))
         
         for itemset, support in sort_itemsets_sup_num.items():
-            f.writelines('{0:d}: {1:s} ({2:d})\n'.format(len(itemset), ' '.join(map(str, itemset)), support))
-    
+            f.writelines('{0:d}: {1:s} ({2:d})\n'.format(len(itemset), ' '.join(map(str, sorted(itemset))), support))
+            
 
 
 def get_candidates_from_log(file_name):
