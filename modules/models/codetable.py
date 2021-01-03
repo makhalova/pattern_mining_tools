@@ -5,7 +5,7 @@ Code table computing
 from math import log2
 from bisect import bisect, insort
 from collections import Counter
-from numpy import vectorize, zeros_like, where, array, dot
+from numpy import vectorize, zeros_like, where, array, dot, zeros
 from pattern_mining_tools.modules.indices.utiltools import sort_itemsets as sort_itemsets
 from pattern_mining_tools.modules.indices.utiltools import compute_indices as compute_indices
 
@@ -124,6 +124,15 @@ class CodeTable:
         self.candidate_indices = None
         self.covering = None
 
+    def list_set_to_list_binary_vector(self, list_of_sets):
+        list_of_binary_vectors = []
+        append = list_of_binary_vectors.append
+        for s in list_of_sets:
+            bin_itemset = zeros(self._n_attributes, dtype=int)
+            bin_itemset[list(s)] = 1
+            append(bin_itemset)
+        return list_of_binary_vectors
+
     def __repr__(self):
         return 'CT over {0} attributes, {1} itemsets'.format(self._n_attributes,
             len(self._nonsingletons))
@@ -137,6 +146,10 @@ class CodeTable:
     def stand_total_len(self):
         # get the standard two-part total description length
         return self._stand_total_len
+
+    @property
+    def itemsets(self):
+        return self._nonsingletons
 
     @property
     def stat(self):
@@ -278,8 +291,6 @@ class CodeTable:
                     del temp_accepted_itemset_ids[position]
         # finalize
         self._total_len = cur_len
-        print((singleton_usg, nonsingleton_usg, list(data.sum(axis = 0)), \
-            [len(self._candidate_extents[i]) for i in temp_accepted_itemset_ids]))
         self._set_stat((singleton_usg, nonsingleton_usg, list(data.sum(axis = 0)), \
             [len(self._candidate_extents[i]) for i in temp_accepted_itemset_ids]))
         return temp_accepted_itemset_ids

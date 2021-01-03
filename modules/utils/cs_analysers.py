@@ -179,9 +179,9 @@ def get_summary_f1(data_tuple_list, output_file_f1 = None, output_file_count = N
     df_total_count = pd.concat(res_count)
     df_total_count.rename(columns = {'f1':'number'}, inplace=True)
 
-    if not(output_file_f1):
+    if not(output_file_f1 is None):
         df_total.to_csv(output_file_f1)
-    if not(output_file_count):
+    if not(output_file_count is None):
         df_total_count.to_csv(output_file_count)
     return df_total, df_total_count
     

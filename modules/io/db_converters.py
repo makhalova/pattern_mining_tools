@@ -2,6 +2,7 @@
 
 
 import numpy as np
+from glob import glob # for get Slim CT
 
 # read training / test data
 def db2train(data_dir, data_name, write_with_targets = True,
@@ -413,3 +414,10 @@ def get_candidates_from_log(file_name):
             itemsets.append((intent,extent_size))
             s = f.readline()
     return itemsets
+    
+    
+def get_slim_CT(ct_dir):
+    code_tables = glob(ct_dir +'.ct')
+    val = max([int(s.split('-')[-1][:-3]) for s in code_tables])
+    return glob(ct_dir + str(val)+ '.ct' )[0]
+

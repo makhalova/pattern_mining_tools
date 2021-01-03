@@ -52,3 +52,28 @@ def discretise_with_borders(original_data_file, border_file, output_file, output
     with open(output_bin_file, 'w') as f:
         f.writelines(str(np.sum([len(v) for v in dim.values()])) + '\n' )
             
+def read_discretized_dataset(data_file):
+    with open(data_file, 'r') as f:
+        s = f.readline()
+        n_attributes = 0
+        while not (s.startswith('@data')):
+            if s.startswith('@attribute dim'):
+                n_attributes += 1
+            s = f.readline()
+
+        data_lst = []
+        for s in f:
+            data_lst.append([int(v) for v in s.split(',')[:-1]])
+
+    X = np.array(data_lst, dtype = int)
+    return X
+    
+    
+def read_bin_number(file_name):
+    n_bins = 0
+    with open(file_name, 'r') as f:
+        for s in f:
+            if s.startswith('dimension'):
+                ss = s.split('(')[1]
+                n_bins += int(ss.split('bins')[0])
+    return n_bins
