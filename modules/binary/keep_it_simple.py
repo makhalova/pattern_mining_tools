@@ -144,7 +144,7 @@ def keep_it_simple_s(data, covering='overlapping', cover_indices=[('length', -1)
             CT = CodeTable(data_new, cover_indices=cover_indices)
             itemsets = CT.list_set_to_list_binary_vector(pruned_sets)
             selected_itemsets = CT.add_itemsets(itemsets, data_new,
-                indices=candidate_indices, covering=covering, **kwargs)
+                indices=candidate_indices, covering=covering)
             selected_keys = [pruned_sets[i] for i in selected_itemsets]
             selected_keys_true = {}
             for s in selected_keys:
@@ -208,7 +208,7 @@ def keep_it_simple_d(data, covering='overlapping', cover_indices=[('length', -1)
             CT = CodeTable(data_new, cover_indices=cover_indices)
             itemsets = CT.list_set_to_list_binary_vector(pruned_sets)
             selected_itemsets = CT.add_itemsets(itemsets, data_new,
-                indices=candidate_indices, covering=covering, **kwargs)
+                indices=candidate_indices, covering=covering)
             selected_keys = [pruned_sets[i] for i in selected_itemsets]
             selected_keys_true = {}
             for s in selected_keys:
@@ -231,7 +231,7 @@ def keep_it_simple_d(data, covering='overlapping', cover_indices=[('length', -1)
             if cr_len > cr_len_new:
                 best_patterns.update(selected_keys_true)
                 if sum(new_dim) > 0:
-                    data_new = data_new[:,new_dim]
+                    data_new = data_uncovered[:, data_uncovered.sum(axis = 0) > 0]
                 else:
                     run = False
             run = run and (sum(new_dim)<data_uncovered.shape[1]) and (cr_len>cr_len_new)
